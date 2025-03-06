@@ -2,6 +2,8 @@
 
 A elegant, user-friendly QR code generator web application built with Next.js and React.
 
+🌐 **[Try it live at qrcle.pages.dev](https://qrcle.pages.dev)**
+
 ![QRcle Logo](/public/qrcle.png)
 
 ## 🌟 Features
@@ -97,7 +99,7 @@ bun run build
 
 ## 📄 License
 
-[MIT License](LICENSE)
+[GPL License](LICENSE)
 
 ## 🤝 Contributing
 
