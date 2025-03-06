@@ -1,7 +1,6 @@
 "use client";
-
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toaster } from "@/components/ui/sonner";
@@ -47,13 +46,30 @@ const ICON_POSITIONS = [
   { value: "center", label: "Center" },
 ];
 
-export default function SharePage() {
+// Loading fallback component
+function SharePageLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-4 md:p-8 flex items-center justify-center">
+      <Card className="w-full max-w-md p-6 bg-white/95 backdrop-blur shadow-xl border-0">
+        <div className="text-center p-8 animate-pulse">
+          <div className="inline-block p-2 rounded-full bg-purple-100 mb-3">
+            <LucideIcons.Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Loading QR Code Share Page</h3>
+          <p className="text-gray-500">Please wait while we prepare your sharing options...</p>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function SharePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const qrContainerRef = useRef<HTMLDivElement>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [canShare, setCanShare] = useState(false); // Add this line
+  const [canShare, setCanShare] = useState(false);
 
   // Get parameters from URL
   const location = searchParams.get("location");
@@ -376,12 +392,11 @@ export default function SharePage() {
         if (err.toString().includes('AbortError')) {
           console.log("User aborted share");
           // suppress error message
-          err = null;
           return;
         } else {
-            console.error('Share error:', err);
+          console.error('Share error:', err);
         }
-    }
+      }
       toast.error('Could not open share sheet');
     }
   };
@@ -398,7 +413,6 @@ export default function SharePage() {
             Your QR code is ready! Download, share, and use it anywhere.
           </p>
         </div>
-
         <Toaster position="top-center" richColors />
         
         {/* Main Content */}
@@ -459,8 +473,7 @@ export default function SharePage() {
                       <LucideIcons.Copy className="w-5 h-5" />
                       <span>Copy to Clipboard</span>
                     </Button>
-
-                    {canShare && ( // Change this line
+                    {canShare && (
                       <Button 
                         onClick={shareQRCode}
                         className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-5 py-2 rounded-lg transition-all duration-300"
@@ -474,7 +487,6 @@ export default function SharePage() {
               )}
             </CardContent>
           </Card>
-
           {/* Information & Options Card */}
           <Card className="w-full lg:w-1/2 bg-white/95 backdrop-blur shadow-xl border-0 transition-all duration-300 hover:shadow-2xl">
             <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
@@ -562,5 +574,13 @@ export default function SharePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SharePage() {
+  return (
+    <Suspense fallback={<SharePageLoading />}>
+      <SharePageContent />
+    </Suspense>
   );
 }

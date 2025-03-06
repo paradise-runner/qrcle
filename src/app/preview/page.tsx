@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import QRCode from "qrcode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,7 +62,24 @@ const ICON_POSITIONS = [
   { value: "center", label: "Center" },
 ];
 
-export default function PreviewPage() {
+// Loading fallback component
+function PreviewLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-4 md:p-8 flex items-center justify-center">
+      <Card className="w-full max-w-md p-6 bg-white/95 backdrop-blur shadow-xl border-0">
+        <div className="text-center p-8 animate-pulse">
+          <div className="inline-block p-2 rounded-full bg-purple-100 mb-3">
+            <LucideIcons.Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">Loading QR Code Preview</h3>
+          <p className="text-gray-500">Please wait while we prepare your preview...</p>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function PreviewPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [qrCodeDataURL, setQrCodeDataURL] = useState<string | null>(null);
@@ -315,7 +332,6 @@ export default function PreviewPage() {
     );
   };
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -499,7 +515,6 @@ export default function PreviewPage() {
                       icon={selectedIcon}
                       iconPosition={iconPosition}
                       text={text}
-                      className="mt-4 bg-purple-50 border border-purple-200"
                     />
                   </div>
                 </div>
@@ -575,16 +590,20 @@ export default function PreviewPage() {
                       </>
                     )}
                   </div>
-                  
-                  {/* Remove the download and print buttons section */}
                 </div>
               )}
             </CardContent>
           </Card>
-
-          {/* Continue with rest of file */}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PreviewPage() {
+  return (
+    <Suspense fallback={<PreviewLoading />}>
+      <PreviewPageContent />
+    </Suspense>
   );
 }
